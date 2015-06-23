@@ -50,74 +50,6 @@
             </div>
             <!-- End Header -->
 
-            <!-- Rooms -->
-            <div class="row-fluid">
-                <div class="span12 well" style="background-color:white; border:0px"> 
-                    <!-- Tabs -->
-                    <div class="row-fluid">
-                        <div class="span12">
-                            <ul id="rooms_tabs" class="nav nav-tabs">
-                                <li class="dropdown">
-                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-th"></i>&nbsp;Options&nbsp;<b class="caret"></b></a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="#modal_joinroom" data-toggle="modal"><i class="icon-plus"></i>&nbsp;Join room</a></li>
-                                        <li><a id="b_leave_room" href="#"><i class="icon-minus"></i>&nbsp;Leave current room</a></li>
-                                        <li class="divider"></li>
-                                        <li><a href="#modal_setnick" data-toggle="modal"><i class="icon-user"></i>&nbsp;Set nickname</a></li>
-                                    </ul>
-                                </li>
-                                <!-- Room tab -->
-                                <li id="MainRoom_tab" class="active"><a href="#MainRoom" data-toggle="tab">MainRoom</a></li>
-                                <!-- End Room tab -->
-                            </ul>
-                        </div>
-                    </div>
-                    <!-- End Tabs -->
-                    <!-- Rooms -->
-                    <div id="rooms" class="tab-content">
-                        <!-- Room -->
-                        <div class="tab-pane active" id="MainRoom">
-                            <div class="row-fluid">
-                                <div class="span12 well">
-                                    <div id="room_messages" style="min-height:220px; max-height:220px; overflow:auto;">
-                                        <!-- Message -->
-                                        <span class="label label-info">ServerBot</span>&nbsp;&nbsp;Welcome to the room :)<br/>
-                                        <!-- End Message -->
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row-fluid">
-                                <div class="span12">
-                                    <h3>Now chatting...</h3>
-                                </div>
-                            </div>
-                            <div class="row-fluid">
-                                <div id="room_users" class="span12">
-                                    <span class="badge badge-inverse">ServerBot</span>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- End Room -->
-                    </div>
-                    <!-- End Rooms -->
-                </div>
-            </div>
-            <!-- End Rooms -->
-
-            <!-- New message input -->
-            <div class="row-fluid">
-                <div class="span12"> 
-                    <div class="navbar">
-                        <div class="navbar-inner">
-                            <form class="navbar-form">
-                                <input id="message_text" type="text" class="span9">
-                                <button id="b_send_message" class="btn btn-primary">Send</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- End New message -->
 
             <!-- Info -->
             <div class="row-fluid">
@@ -182,8 +114,8 @@
         <script src="js/vendor/bootstrap.min.js"></script>
         <script src="js/vendor/underscore-min.js"></script>
         <script src="js/vendor/handlebars-1.0.rc.1.js"></script>
-        <script src="/socket.io/socket.io.js"></script>
-        <script src="js/main.js"></script>
+        <!--<script src="/socket.io/socket.io.js"></script>
+        <script src="js/main.js"></script>-->
     </body>
 </html>
 

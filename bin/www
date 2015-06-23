@@ -8,7 +8,8 @@ var app = require('../app');
 var debug = require('debug')('myExpressApp:server');
 var http = require('http');
 var conf = require('../conf');
-var chat = require('../chat');
+var Bayeux = require('../services/bayeux.js').Bayeux;
+// var chat = require('../chat');
 /**
  * Get port from environment and store in Express.
  */
@@ -21,7 +22,10 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
-chat(server);
+// console.log(bayeuxInit);
+// console.log(typeof bayeuxInit);
+Bayeux(server);
+// chat(server);
 
 /**
  * Listen on provided port, on all network interfaces.

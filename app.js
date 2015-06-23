@@ -5,9 +5,15 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var cors = require('cors')
 
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://128.199.248.88:27017/lynda');
+
+//routes setup
 var routes = require('./routes/index');
 var users = require('./routes/users');
+var programs = require('./routes/programs');
 
 var app = express();
 
@@ -21,11 +27,15 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(cors());
+
 // app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'static')));
+// app.use();
 
 app.use('/', routes);
 app.use('/users', users);
+app.use('/programs', programs);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
