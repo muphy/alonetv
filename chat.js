@@ -9,9 +9,9 @@ module.exports = function (server) {
 
 	// Socket.io store configuration
 	var RedisStore = require('socket.io/lib/stores/redis'),
-		pub = redis.createClient(conf.dbPort, conf.dbHost, conf.dbOptions),
-		sub = redis.createClient(conf.dbPort, conf.dbHost, conf.dbOptions),
-		db = redis.createClient(conf.dbPort, conf.dbHost, conf.dbOptions);
+		pub = redis.createClient(conf.redisPort, conf.redisHost, conf.redisOptions),
+		sub = redis.createClient(conf.redisPort, conf.redisHost, conf.redisOptions),
+		db = redis.createClient(conf.redisPort, conf.redisHost, conf.redisOptions);
 	io.set('store', new RedisStore({
 		redisPub: pub,
 		redisSub: sub,

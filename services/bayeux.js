@@ -1,5 +1,7 @@
 
+
 module.exports.Bayeux = function(server) {
+	var conf = require('../conf');
 	var util = require('util');
 	var faye = require('faye');
 	var fayeRedis = require('faye-redis');
@@ -8,8 +10,8 @@ module.exports.Bayeux = function(server) {
 		timeout: 45,
 		engine: {
 			type: fayeRedis,
-			host: 'localhost',
-			port: 6379
+			host: conf.redisHost,
+			port: conf.redisPort
 		}
 	});
 
