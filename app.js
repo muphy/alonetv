@@ -6,9 +6,10 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var cors = require('cors')
+var conf = require('conf');
 
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://128.199.248.88:27017/lynda');
+mongoose.connect(conf.mongoDBUrl);
 
 //routes setup
 var routes = require('./routes/index');

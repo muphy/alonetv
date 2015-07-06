@@ -15,12 +15,9 @@ router.get('/', function (req, res, next) {
 
 /* GET /programs/current current programs list. */
 router.get('/current', function (req, res, next) {
-  Program.find(function (err, programs) {
+  var currentTime = Date.now();
+  Program.find({ "beginTime": { $lt: currentTime }, "endTime": { $gt: currentTime } }, function (err, list) {
     if (err) return next(err);
-    var currentTime = Date.now();
-    var list = _.pick(programs, function (e, i) {
-      return currentTime >= e.beginTime && currentTime <= e.endTime;
-    });
     res.json(list);
   });
 });

@@ -9,35 +9,47 @@ var cheerio = require('cheerio');
 var request = require('request');
 var rp = require('request-promise');
 var s = require("underscore.string");
+var winston = require('winston');
 
-function URLs() {
+winston.level = 'debug';
+
+winston.log('info', 'program reader process started.');
+winston.add(winston.transports.File, { filename: '../../batch.log' });
+
+function URLs(isTomorrow) {
     var PROGRAME_BASE_URL = 'http://tvguide.naver.com/program/multiChannel.nhn?';
     var urlFormatterList = [PROGRAME_BASE_URL + 'broadcastType=100&date=%s', PROGRAME_BASE_URL + 'broadcastType=500&channelGroup=46&date=%s',
         PROGRAME_BASE_URL + 'broadcastType=200&channelGroup=13&date=%s'
     ];
     var URLs = _.map(urlFormatterList, function (urlFormat) {
-        return util.format(urlFormat, utils.today());
+        return util.format(urlFormat, isTomorrow ? utils.tomorrow() : utils.today());
     });
     // console.log(URLs);
     return URLs;
 }
 
-function process() {
-    var locationToSave = 'mongodb'; //or 'file' || 'mongodb'
-    var justCurrentProgram = false; // if true, just fetch current programs.
-    var trashChannels = ['채널 A', 'MBN', 'TV 조선', '채널A','OBS 경인TV','경인 KBS1','QTV','MBC every1','MBC Music','XTM','E채널','Mnet',
-        'KBS WORLD','K STAR','SBS MTV','SBS funE','FX','코미디TV','KBS Joy','I.NET','월드이벤트TV','CMC 가족오락TV','Sky ENT','GMTV','가요TV','etn 연예채널','CH W'];
+function process(options) {
+    var option = options || {
+        locationToSave: 'mongodb',
+        justCurrentProgram: false,
+        isTomorrow: false
+    };
+    winston.log('info','option:'+JSON.stringify(option));
+    var locationToSave = option.locationToSave; //or 'file' || 'mongodb'
+    var justCurrentProgram = option.justCurrentProgram; // if true, just fetch current programs.
+    var trashChannels = ['채널 A', 'MBN', 'TV 조선', '채널A', 'OBS 경인TV', '경인 KBS1', 'QTV', 'MBC every1', 'MBC Music', 'XTM', 'E채널',
+        'KBS WORLD', 'K STAR', 'SBS MTV', 'SBS funE', 'FX', '코미디TV', 'KBS Joy', 'I.NET', '월드이벤트TV', 'CMC 가족오락TV', 'Sky ENT', 'GMTV', '가요TV', 'etn 연예채널', 'CH W'];
     Promise.promisifyAll(needle);
     var current = Promise.resolve();
-    var options = {
+    var request_options = {
         headers: {
             "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.118 Safari/537.36",
         }
     };
-    Promise.map(URLs(), function (URL) {
+    Promise.map(URLs(option.isTomorrow), function (URL) {
         // console.log(URL);
         current = current.then(function () {
-            return needle.getAsync(URL, options);
+            return needle.getAsync(URL, request_options);
         });
         return current;
     }).map(function (responseAndBody) {
@@ -95,7 +107,7 @@ function process() {
         // console.log(list);
         return _.map(list, function (e) {
             // console.log(e);
-            return { 
+            return {
                 scheduleName: _.propertyOf(e)('scheduleName'),
                 channelName: _.propertyOf(e)('channelName'),
                 scheduleId: _.propertyOf(e)('scheduleId')
@@ -115,7 +127,7 @@ function process() {
                 }
             };
             // console.log(pageUrl);
-            var rp1 = rp(requestOptions).then(function(res) {
+            var rp1 = rp(requestOptions).then(function (res) {
                 return res;
             });
             promiseList.push(rp1);
@@ -129,14 +141,14 @@ function process() {
             _.mapObject(result, function (body, key) {
                 var schedule = scheduleNames[count];
                 // console.log(schedule);
-                var imgUrl = thumbnailCollector.getImgUrl(schedule,body)||'https://s3-ap-northeast-1.amazonaws.com/infinispanping/infinispan-cluster/139.jpg';
+                var imgUrl = thumbnailCollector.getImgUrl(schedule, body) || 'https://s3-ap-northeast-1.amazonaws.com/infinispanping/infinispan-cluster/139.jpg';
                 list.push({
-                   scheduleId:schedule.scheduleId,imgUrl:imgUrl 
+                    scheduleId: schedule.scheduleId, imgUrl: imgUrl
                 });
-                count = count+1;
+                count = count + 1;
             });
             return list;
-        }).then(function(list) {
+        }).then(function (list) {
             console.log(list);
             thumbnailCollector.updateProgramThumbToMongo(list);
         }).catch(function (e) {
@@ -165,12 +177,12 @@ module.exports.convertProgramDate = convertProgramDate;
 var thumbnailCollector = {
     programPageUrl: function (scheduleName) {
         var urlFormat = 'http://movie.daum.net/search.do?type=tv&q=%s';
-        if(scheduleName.indexOf("무한") > 0) {
+        if (scheduleName.indexOf("무한") > 0) {
             urlFormat = urlFormat + '&bweek=NNNNNYN'; //Y is a mark of the day that can watch show.
         }
         return util.format(urlFormat, encodeURIComponent(scheduleName.replace(' ', '+')));
     },
-    getImgUrl: function (schedule,responseAndBody) {
+    getImgUrl: function (schedule, responseAndBody) {
         var $ = cheerio.load(responseAndBody);
         // var scheduleName = schedule.scheduleName;
         // var channelName = schedule.channelName;

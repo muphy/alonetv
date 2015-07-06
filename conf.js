@@ -4,7 +4,8 @@ var localConf = {
     redisPort: 6379,
     redisHost: '127.0.0.1',
     dbOptions: {},
-	mainroom: 'MainRoom'
+	mainroom: 'MainRoom',
+    mongoDBUrl:'mongodb://128.199.248.88:27017/lynda'
 };
 var devConf = {
     port: 8888,
@@ -12,7 +13,8 @@ var devConf = {
     redisPort: 6379,
     redisHost: '128.199.248.88',
     redisOptions: {},
-	mainroom: 'MainRoom'
+	mainroom: 'MainRoom',
+    mongoDBUrl:'mongodb://128.199.248.88:27017/lynda'
 }
-module.exports = devConf;
-// module.exports = localConf; 
+// module.exports = devConf;
+module.exports = localConf; 
