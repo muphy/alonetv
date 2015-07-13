@@ -1,6 +1,7 @@
 
+var User = require('../models/User');
 
-module.exports.Bayeux = function(server) {
+module.exports.Bayeux = function (server) {
 	var conf = require('../conf');
 	var util = require('util');
 	var faye = require('faye');
@@ -34,6 +35,36 @@ module.exports.Bayeux = function(server) {
 	bayeux.on('disconnect', function (client_id) {
 		console.log(util.format('[disconnect] - client:%s', client_id));
 	});
+
+
+	var authExtention = {
+		incoming: function (message, callback) {
+			console.log('incoming', message);
+			var channel = message.channel;
+			if (channel == "/meta/subscribe") {
+				var userId = message.ext.userId;
+				User.findById(userId, function (err, user) {
+					if(user) {
+						// console.log('user'+user);
+						if(!message.ext) message.ext = {};
+						message.ext.userName = user.name;
+					} 
+					// console.log(user.name);     // name is required
+				    callback(message);
+					// console.log(virus.taxonomy); // taxonomy is not
+				})
+			} else {
+				callback(message);
+			}
+			
+		},
+		outgoing: function (message, callback) {
+			console.log('outgoing', message);
+			console.log('message.ext' + message.ext);
+			callback(message);
+		}
+	};
+	bayeux.addExtension(authExtention);
 	return bayeux;
 }
 

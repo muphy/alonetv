@@ -1,14 +1,14 @@
 var fs = require("fs");
-
+var MODULE_PATH = "../node_modules" 
 function main() {
-  fs.readdir("../node_modules", function (err, dirs) {
+  fs.readdir(MODULE_PATH, function (err, dirs) {
     if (err) {
       console.log(err);
       return;
     }
     dirs.forEach(function(dir){
       if (dir.indexOf(".") !== 0) {
-        var packageJsonFile = "../node_modules/" + dir + "/package.json";
+        var packageJsonFile = MODULE_PATH + dir + "/package.json";
         if (fs.existsSync(packageJsonFile)) {
           fs.readFile(packageJsonFile, function (err, data) {
             if (err) {

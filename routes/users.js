@@ -33,7 +33,7 @@ router.post('/', function (req, res, next) {
       var newUser = new User(req.body);
       newUser.save(function (err) {
         if (!err) {
-          return res.json(200, req.body);
+          return res.json(200, user);
         } else {
           return res.json(500, { error: err });
         }

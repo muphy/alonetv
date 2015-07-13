@@ -41,13 +41,12 @@ module.exports = {
         test.done();
     },
     test_process2: function (test) {
-            var option = {
-        locationToSave: 'mongodb',
-        justCurrentProgram: false,
-        isTomorrow: true
-    };
-    programReader.process();
-        // programReader.process();
+        var option = {
+            locationToSave: 'mongodb',
+            justCurrentProgram: false,
+            isTomorrow: true
+        };
+        programReader.process(option);
         test.done();
     },
     test_connet_mongo: function (test) {
