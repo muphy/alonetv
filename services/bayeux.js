@@ -38,7 +38,9 @@ module.exports.Bayeux = function (server) {
 
 
 	var authExtention = {
+		clients: {},
 		incoming: function (message, callback) {
+			var self = this;
 			console.log('incoming', message);
 			var channel = message.channel;
 			if (channel == "/meta/subscribe") {
@@ -48,10 +50,12 @@ module.exports.Bayeux = function (server) {
 						// console.log('user'+user);
 						if(!message.ext) message.ext = {};
 						message.ext.userName = user.name;
+						self.clients[message.clientId] = bayeux.getClient();
+						message.ext.type = 'join';
+						console.log('subscription:'+message.subscription);
+						self.clients[message.clientId].publish(message.subscription,message);
 					} 
-					// console.log(user.name);     // name is required
 				    callback(message);
-					// console.log(virus.taxonomy); // taxonomy is not
 				})
 			} else {
 				callback(message);
@@ -59,8 +63,8 @@ module.exports.Bayeux = function (server) {
 			
 		},
 		outgoing: function (message, callback) {
-			console.log('outgoing', message);
-			console.log('message.ext' + message.ext);
+			// console.log('outgoing', message);
+			// console.log('message.ext' + message.ext);
 			callback(message);
 		}
 	};

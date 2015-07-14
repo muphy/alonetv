@@ -1,5 +1,6 @@
 var fs = require("fs");
-var MODULE_PATH = "../node_modules" 
+var MODULE_PATH = "../node_modules";
+MODULE_PATH = 'D:/project/bonsa/lynda';
 function main() {
   fs.readdir(MODULE_PATH, function (err, dirs) {
     if (err) {
