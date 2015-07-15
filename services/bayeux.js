@@ -46,21 +46,21 @@ module.exports.Bayeux = function (server) {
 			if (channel == "/meta/subscribe") {
 				var userId = message.ext.userId;
 				User.findById(userId, function (err, user) {
-					if(user) {
+					if (user) {
 						// console.log('user'+user);
-						if(!message.ext) message.ext = {};
+						if (!message.ext) message.ext = {};
 						message.ext.userName = user.name;
 						self.clients[message.clientId] = bayeux.getClient();
 						message.ext.type = 'join';
-						console.log('subscription:'+message.subscription);
-						self.clients[message.clientId].publish(message.subscription,message);
-					} 
-				    callback(message);
+						console.log('subscription:' + message.subscription);
+						self.clients[message.clientId].publish(message.subscription, message);
+					}
+					callback(message);
 				})
-			} else {
+			}  else {
 				callback(message);
 			}
-			
+
 		},
 		outgoing: function (message, callback) {
 			// console.log('outgoing', message);
