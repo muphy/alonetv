@@ -28,7 +28,7 @@ function URLs(isTomorrow) {
     return URLs;
 }
 
-function process(options) {
+var doJob = function(options) {
     var option = options || {
         locationToSave: 'mongodb',
         justCurrentProgram: false,
@@ -157,9 +157,9 @@ function process(options) {
     });
 }
 
-module.exports.process = process;
+module.exports.process = doJob;
 
-var convertProgramDate = function (program) {
+module.exports.convertProgramDate = function (program) {
     var beginTime = util.format('%s %s', program.beginDate, program.beginTime);
     var endTime = util.format('%s %s', program.beginDate, program.endTime);
     var beginTimeN = Date.parse(beginTime);
@@ -172,7 +172,6 @@ var convertProgramDate = function (program) {
     program.endTime = endTimeN;
     return program;
 };
-module.exports.convertProgramDate = convertProgramDate;
 
 var thumbnailCollector = {
     programPageUrl: function (scheduleName) {
