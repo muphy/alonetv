@@ -1,10 +1,9 @@
 ####edit 
 ```
-vi /etc/init/yourprogram.conf
-vi /etc/init/paul.conf
+vi /etc/init/p_b_s.conf
 ```
 ####script
-	description "npm start"
+	description "start scheduler for programReader"
 	author      "muphy"
 	
 	# used to be: start on startup
@@ -19,8 +18,8 @@ vi /etc/init/paul.conf
 	script
 	    # Not sure why $HOME is needed, but we found that it is:
 	    export HOME="/root"
-	    cd /root/server/alonetv
-	    exec /usr/local/bin/npm start >> /var/log/node.log 2>&1
+	    cd /root/server/alonetv/batch
+	    exec /usr/bin/node batch_programProcess.js>> /var/log/palu_scheduler.log 2>&1
 	end script
 	
 	post-start script
@@ -29,9 +28,9 @@ vi /etc/init/paul.conf
 	end script
 	
 ```
-	start paul
+	start p_b_s
 ```
 
 ```
-	stop paul
+	stop p_b_s
 ```
