@@ -1,5 +1,6 @@
 
 var User = require('../models/User');
+var Message = require('../models/Message');
 
 module.exports.Bayeux = function (server) {
 	var conf = require('../conf');
@@ -30,6 +31,13 @@ module.exports.Bayeux = function (server) {
 	bayeux.on('publish', function (client_id, channel, data) {
 		console.log(util.format('[publish] - client:%s, channel:%s', client_id, channel));
 		console.log("[publish] - data");
+		if(data.ext && data.ext.type == 'chat') {
+			var message = new Message(data);
+			message.save(function (err) {
+				if (err) console.log(err);
+				else console.log('success');
+			});
+		} 
 		console.log(data);
 	});
 	bayeux.on('disconnect', function (client_id) {

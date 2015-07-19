@@ -70,7 +70,7 @@ var doJob = function(options) {
                 };
                 var programList = channel.programList;
                 _.each(programList, function (program) {
-                    var convertedProgram = convertProgramDate(program);
+                    var convertedProgram = convertProgramOfDate(program);
                     convertedProgram = _.extend(convertedProgram, channelInfo);
                     myProgramList.push(convertedProgram);
                 });
@@ -159,7 +159,7 @@ var doJob = function(options) {
 
 module.exports.process = doJob;
 
-module.exports.convertProgramDate = function (program) {
+var convertProgramOfDate = function (program) {
     var beginTime = util.format('%s %s', program.beginDate, program.beginTime);
     var endTime = util.format('%s %s', program.beginDate, program.endTime);
     var beginTimeN = Date.parse(beginTime);
@@ -172,7 +172,7 @@ module.exports.convertProgramDate = function (program) {
     program.endTime = endTimeN;
     return program;
 };
-
+module.exports.convertProgramDate = convertProgramOfDate;
 var thumbnailCollector = {
     programPageUrl: function (scheduleName) {
         var urlFormat = 'http://movie.daum.net/search.do?type=tv&q=%s';
