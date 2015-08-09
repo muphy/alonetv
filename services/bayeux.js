@@ -1,6 +1,7 @@
 
 var User = require('../models/User');
 var Message = require('../models/Message');
+var logger = require('tracer').console();
 
 module.exports.Bayeux = function (server) {
 	var conf = require('../conf');
@@ -19,60 +20,86 @@ module.exports.Bayeux = function (server) {
 
 	bayeux.attach(server);
 
+	var clients = {};
 	bayeux.on('handshake', function (client_id) {
-		console.log(util.format('[handshake] - client:%s', client_id));
+		logger.log(util.format('[handshake] - client:%s', client_id));
 	});
 	bayeux.on('subscribe', function (client_id, channel) {
-		console.log(util.format('[subscribe] - client:%s, channel:%s', client_id, channel));
+		logger.log(util.format('[subscribe] - client:%s, channel:%s', client_id, channel));
 	});
 	bayeux.on('unsubscribe', function (client_id, channel) {
-		console.log(util.format('[unsubscribe] - client:%s, channel:%s', client_id, channel));
+		logger.log(util.format('[unsubscribe] - client:%s, channel:%s', client_id, channel));
+		logger.log("---------------------");
+		// logger.log('clients',clients);
+		// var userId = clients[client_id].userId;
+		if(clients[client_id] && clients[client_id].userId) {
+		User.findById(userId, function (err, user) {
+			if (user) {
+				var exit_message = {
+					pic: user.imgurl,
+					username: user.name,
+					userId: user.userId,
+					text: user.name + " 님께서 나가셨습니다.",
+					ext: {
+						type: 'exit'
+					}
+				};
+				clients[client_id].client.publish(channel, exit_message);
+
+			}
+		})
+			
+		}
 	});
 	bayeux.on('publish', function (client_id, channel, data) {
-		console.log(util.format('[publish] - client:%s, channel:%s', client_id, channel));
-		console.log("[publish] - data");
-		if(data.ext && data.ext.type == 'chat') {
+		logger.log(util.format('[publish] - client:%s, channel:%s', client_id, channel));
+		logger.log("[publish] - data");
+		if (data.ext && data.ext.type == 'chat') {
 			var message = new Message(data);
 			message.save(function (err) {
-				if (err) console.log(err);
-				else console.log('success');
+				if (err) logger.log(err);
+				else logger.log('success');
 			});
-		} 
-		console.log(data);
+		}
+		logger.log(data);
 	});
 	bayeux.on('disconnect', function (client_id) {
-		console.log(util.format('[disconnect] - client:%s', client_id));
+		logger.log(util.format('[disconnect] - client:%s', client_id));
+		delete clients[client_id];
 	});
 
 
 	var authExtention = {
-		clients: {},
+		// clients: {},
 		incoming: function (message, callback) {
 			var self = this;
-			console.log('incoming', message);
+			logger.log('incoming', message);
 			var channel = message.channel;
 			if (channel == "/meta/subscribe") {
 				var userId = message.ext.userId;
 				User.findById(userId, function (err, user) {
 					if (user) {
-						// console.log('user'+user);
+						// logger.log('user'+user);
 						if (!message.ext) message.ext = {};
 						message.ext.userName = user.name;
-						self.clients[message.clientId] = bayeux.getClient();
+						clients[message.clientId] = {
+							client: bayeux.getClient(),
+							userId: userId
+						}
 						message.ext.type = 'join';
-						console.log('subscription:' + message.subscription);
-						self.clients[message.clientId].publish(message.subscription, message);
+						bayeux.getClient().publish(message.subscription, message);
+						logger.log('clients:',clients);
 					}
 					callback(message);
 				})
-			}  else {
+			} else {
 				callback(message);
 			}
 
 		},
 		outgoing: function (message, callback) {
-			// console.log('outgoing', message);
-			// console.log('message.ext' + message.ext);
+			// logger.log('outgoing', message);
+			// logger.log('message.ext' + message.ext);
 			callback(message);
 		}
 	};
