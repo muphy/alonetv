@@ -20,7 +20,8 @@ var ProgramSchema = new mongoose.Schema({
 	"subtitle": String,
 	"signLanguage": Boolean,
 	"broadcastName": String,
-	"channelName": String
+	"channelName": String,
+	"members": Number
 });
-
+ProgramSchema.index({beginTime:-1});
 module.exports = mongoose.model('Program', ProgramSchema);

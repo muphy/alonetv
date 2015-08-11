@@ -24,5 +24,6 @@ var MessageSchema = new mongoose.Schema({
 		programName: String
 	}
 });
+MessageSchema.index({createDate:-1})
 
 module.exports = mongoose.model('Message', MessageSchema);
