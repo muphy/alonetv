@@ -19,48 +19,59 @@ module.exports.Bayeux = function (server) {
 		}
 	});
 
+    var lobby_channel = '/lobby';
 	bayeux.attach(server);
 
-	var clients = {};
 	bayeux.on('handshake', function (client_id) {
 		logger.log(util.format('[handshake] - client:%s', client_id));
 	});
 	bayeux.on('subscribe', function (client_id, channel) {
 		logger.log(util.format('[subscribe] - client:%s, channel:%s', client_id, channel));
+		if(/lobby/.test(channel))return;
+		var channelInfo = channel.split('_');
+		var queryParam = {scheduleId: channelInfo[0].substring(1), beginTime: channelInfo[1]};
+		logger.log(queryParam);
+		var updateMemberCtn = Program.where(queryParam).update({ $inc: { members: 1 } }).exec();
+		var programResult = updateMemberCtn.then(function(result) {
+			var query = Program.findOne(queryParam);
+				query.select('scheduleId members');
+				return query.exec();
+		});
+		var sendingMessage = programResult.then(function(program) {
+			//TODO
+			//get last message and fill in the message;
+			logger.log('program',program);
+			var message = {
+				program:program
+			}
+			bayeux.getClient().publish(lobby_channel, message);
+		});
 	});
 	bayeux.on('unsubscribe', function (client_id, channel) {
 		logger.log(util.format('[unsubscribe] - client:%s, channel:%s', client_id, channel));
-		logger.log("---------------------");
-		// logger.log('clients',clients);
-		// var userId = clients[client_id].userId;
-		if (clients[client_id]) {
-			var userId = clients[client_id].userId;
-			logger.log('userId', userId);
-			User.findById(userId, function (err, user) {
-				if (user) {
-					var exit_message = {
-						pic: user.imgurl,
-						username: user.name,
-						userId: user.userId,
-						text: user.name + " 님께서 나가셨습니다.",
-						ext: {
-							type: 'exit'
-						}
-					};
-					logger.log('exit_message', exit_message);
-					bayeux.getClient().publish(channel, exit_message);
-					var channelInfo = channel.split('_');
-					Program.where({ scheduleId: channelInfo[0].substring(1), beginTime: channelInfo[1] })
-						.update({ $dec: { members: 1 } }, function () { });
-				}
-			})
+		if(/lobby/.test(channel))return;
+		var channelInfo = channel.split('_');
+		var queryParam = {scheduleId: channelInfo[0].substring(1), beginTime: channelInfo[1]};
+		var updateMemberCtn = Program.where(queryParam).update({ $inc: { members: -1 } }).exec();
+		var programResult = updateMemberCtn.then(function(result) {
+			var query = Program.findOne(queryParam);
+				query.select('scheduleId members');
+				return query.exec();
+		});
+		var sendingMessage = programResult.then(function(program) {
+			//TODO
+			//get last message and fill in the message;
+			var message = {
+				program:program
+			}
+			bayeux.getClient().publish(lobby_channel, message);
+		});
 
-		}
 	});
 	bayeux.on('publish', function (client_id, channel, data) {
 		logger.log(util.format('[publish] - client:%s, channel:%s', client_id, channel));
 		logger.log("[publish] - data");
-		if (data.ext && data.ext.type == 'chat') {
+		if (data.type == 'chat') {
 			var message = new Message(data);
 			message.save(function (err) {
 				if (err) logger.log(err);
@@ -71,47 +82,21 @@ module.exports.Bayeux = function (server) {
 	});
 	bayeux.on('disconnect', function (client_id) {
 		logger.log(util.format('[disconnect] - client:%s', client_id));
-		delete clients[client_id];
 	});
 
 
 	var authExtention = {
-		// clients: {},
 		incoming: function (message, callback) {
-			// logger.log('incoming', message);
-			var channel = message.channel;
-			if (channel == "/meta/subscribe") {
-				var userId = message.ext.userId;
-				logger.log('incoming===>', JSON.stringify(message));
-				User.findById(userId, function (err, user) {
-					if (user) {
-						// logger.log('user'+user);
-						if (!message.ext) message.ext = {};
-						message.ext.userName = user.name;
-						clients[message.clientId] = {
-							userId: userId
-						}
-						message.ext.type = 'join';
-						bayeux.getClient().publish(message.subscription, message);
-						var channelInfo = message.subscription.split('_');
-						Program.where({ scheduleId: channelInfo[0].substring(1), beginTime: channelInfo[1] })
-							.update({ $inc: { members: 1 } }, function () { });
-
-					}
-					callback(message);
-				})
-			} else {
-				callback(message);
-			}
-
+			callback(message);
 		},
 		outgoing: function (message, callback) {
 			// logger.log('outgoing', message);
-			// logger.log('message.ext' + message.ext);
+			// logger.log('message' + message);
 			callback(message);
 		}
 	};
 	bayeux.addExtension(authExtention);
+
 	return bayeux;
 }
 
