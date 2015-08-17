@@ -13,17 +13,19 @@ var mongoose = require('mongoose');
     //     }
 var MessageSchema = new mongoose.Schema({
 	username: String,
+	pic:String,
 	userId: String,
 	text: String,
 	id: String,
 	date: Date,
 	createDate: Date,
+	isChat: {type:Boolean,default: true},
 	channel: {
 		name: String,
 		id: String,
-		programName: String
+		scheduleId: String
 	}
 });
-MessageSchema.index({createDate:-1})
+MessageSchema.index({date:-1})
 
 module.exports = mongoose.model('Message', MessageSchema);

@@ -27,44 +27,48 @@ module.exports.Bayeux = function (server) {
 	});
 	bayeux.on('subscribe', function (client_id, channel) {
 		logger.log(util.format('[subscribe] - client:%s, channel:%s', client_id, channel));
-		if(/lobby/.test(channel))return;
+		if (/lobby/.test(channel)) return;
 		var channelInfo = channel.split('_');
-		var queryParam = {scheduleId: channelInfo[0].substring(1), beginTime: channelInfo[1]};
-		logger.log(queryParam);
-		var updateMemberCtn = Program.where(queryParam).update({ $inc: { members: 1 } }).exec();
-		var programResult = updateMemberCtn.then(function(result) {
-			var query = Program.findOne(queryParam);
-				query.select('scheduleId members');
-				return query.exec();
+		var queryParam = { scheduleId: channelInfo[0].substring(1), beginTime: Number(channelInfo[1]) };
+		logger.log('queryParam=>', queryParam);
+		var updateMemberCtn = Program.update(queryParam, { $inc: { members: 1 }})
+			.limit(1).exec();
+		var programResult = updateMemberCtn.then(function (result) {
+			logger.log('update result', result);
+			return Program.findOne(queryParam, 'scheduleId members').exec();
 		});
-		var sendingMessage = programResult.then(function(program) {
+		var sendingMessage = programResult.then(function (program) {
 			//TODO
 			//get last message and fill in the message;
-			logger.log('program',program);
+			logger.log('program', program);
 			var message = {
-				program:program
+				program: program
 			}
-			bayeux.getClient().publish(lobby_channel, message);
+			logger.log('lobby_channel', lobby_channel);
+			bayeux.getClient().publish(lobby_channel, JSON.stringify(message));
 		});
 	});
 	bayeux.on('unsubscribe', function (client_id, channel) {
 		logger.log(util.format('[unsubscribe] - client:%s, channel:%s', client_id, channel));
-		if(/lobby/.test(channel))return;
+		if (/lobby/.test(channel)) return;
 		var channelInfo = channel.split('_');
-		var queryParam = {scheduleId: channelInfo[0].substring(1), beginTime: channelInfo[1]};
-		var updateMemberCtn = Program.where(queryParam).update({ $inc: { members: -1 } }).exec();
-		var programResult = updateMemberCtn.then(function(result) {
-			var query = Program.findOne(queryParam);
-				query.select('scheduleId members');
-				return query.exec();
+		var queryParam = { scheduleId: channelInfo[0].substring(1), beginTime: Number(channelInfo[1]) };
+		logger.log('queryParam=>', queryParam);
+		var updateMemberCtn = Program.update(queryParam, { $inc: { members: -1 }})
+			.limit(1).exec();
+		var programResult = updateMemberCtn.then(function (result) {
+			logger.log('update result', result);
+			return Program.findOne(queryParam, 'scheduleId members').exec();
 		});
-		var sendingMessage = programResult.then(function(program) {
+		var sendingMessage = programResult.then(function (program) {
 			//TODO
 			//get last message and fill in the message;
+			logger.log('program', program);
 			var message = {
-				program:program
+				program: program
 			}
-			bayeux.getClient().publish(lobby_channel, message);
+			logger.log('lobby_channel', lobby_channel);
+			bayeux.getClient().publish(lobby_channel, JSON.stringify(message));
 		});
 
 	});
@@ -73,6 +77,7 @@ module.exports.Bayeux = function (server) {
 		logger.log("[publish] - data");
 		if (data.type == 'chat') {
 			var message = new Message(data);
+			data.createDate = new Date();
 			message.save(function (err) {
 				if (err) logger.log(err);
 				else logger.log('success');

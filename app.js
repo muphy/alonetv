@@ -15,6 +15,8 @@ mongoose.connect(conf.mongoDBUrl);
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var programs = require('./routes/programs');
+var messages = require('./routes/messages');
+
 
 var app = express();
 
@@ -37,6 +39,7 @@ app.use(express.static(path.join(__dirname, 'static')));
 app.use('/', routes);
 app.use('/users', users);
 app.use('/programs', programs);
+app.use('/messages', messages);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

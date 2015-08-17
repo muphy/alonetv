@@ -21,7 +21,7 @@ var ProgramSchema = new mongoose.Schema({
 	"signLanguage": Boolean,
 	"broadcastName": String,
 	"channelName": String,
-	"members": Number
+	"members": {type:Number, default: 0}
 });
 ProgramSchema.index({beginTime:-1});
 module.exports = mongoose.model('Program', ProgramSchema);
