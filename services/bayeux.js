@@ -83,29 +83,7 @@ module.exports.Bayeux = function (server) {
 				if (err) logger.log(err);
 				else logger.log('success');
 			});
-		} else if (data.type == 'exit') {
-			var participant = new Participant(data);
-			participant.status = false;
-			participant.scheduleId = data.channel.scheduleId;
-			participant.exitDate = new Date();
-			var query = {scheduleId:participant.scheduleId,userId:participant.userId};
-			console.log('query=>',query);
-			Participant.findOneAndUpdate(query, participant, { upsert: true }, function (err, num, n) {
-				if (err) logger.log(err);
-				else logger.log('join update success');
-			});
-		} else if (data.type == 'join') {
-			var participant = new Participant(data);
-			participant.status = true;
-			participant.scheduleId = data.channel.scheduleId;
-			participant.exitDate = new Date();
-			var query = {scheduleId:participant.scheduleId,userId:participant.userId};
-			console.log('query=>',query);
-			Participant.findOneAndUpdate(query, participant, { upsert: true }, function (err, num, n) {
-				if (err) logger.log(err);
-				else logger.log('exit update success');
-			});
-		}
+		} 
 
 		
 		// logger.log(data);

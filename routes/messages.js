@@ -12,8 +12,8 @@ router.get('/:scheduleid', function (req, res, next) {
     if (err) return next(err);
     res.json(list);
   };
-  Message.find({ 'channel.scheduleId': scheduleId }).
-    limit(20).
+  Message.find({ 'channel.scheduleId': scheduleId }).sort({date:-1})
+    .limit(20).
     exec(callback);
 });
 
