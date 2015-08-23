@@ -15,6 +15,7 @@ var Participant = new mongoose.Schema({
 	username: String,
 	pic:String,
 	userId: String,
+	link: String,
 	id: String,
 	date: { type: Date, default: Date.now },
 	joinDate: { type: Date, default: Date.now },

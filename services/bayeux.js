@@ -75,37 +75,57 @@ module.exports.Bayeux = function (server) {
 	});
 	bayeux.on('publish', function (client_id, channel, data) {
 		logger.log(util.format('[publish] - client_id:%s, channel:%s', client_id, channel));
-		logger.log("[publish] - data",data);
-		if (data.type == 'chat') {
-			var message = new Message(data);
-			data.createDate = new Date();
-			message.save(function (err) {
-				if (err) logger.log(err);
-				else logger.log('success');
-			});
-		} else if (data.type == 'exit') {
-			var participant = new Participant(data);
-			participant.status = false;
-			participant.scheduleId = data.channel.scheduleId;
-			participant.exitDate = new Date();
-			var query = {scheduleId:participant.scheduleId,userId:participant.userId};
-			console.log('query=>',query);
-			Participant.findOneAndUpdate(query, participant, { upsert: true }, function (err, num, n) {
-				if (err) logger.log(err);
-				else logger.log('join update success');
-			});
-		} else if (data.type == 'join') {
-			var participant = new Participant(data);
-			participant.status = true;
-			participant.scheduleId = data.channel.scheduleId;
-			participant.exitDate = new Date();
-			var query = {scheduleId:participant.scheduleId,userId:participant.userId};
-			console.log('query=>',query);
-			Participant.findOneAndUpdate(query, participant, { upsert: true }, function (err, num, n) {
-				if (err) logger.log(err);
-				else logger.log('exit update success');
-			});
+		logger.log("[publish] - data", data);
+		try {
+			if (data.type == 'chat') {
+				var message = new Message(data);
+				data.createDate = new Date();
+				message.save(function (err) {
+					if (err) logger.log(err);
+					else logger.log('success');
+				});
+			} else {
+				var query = { scheduleId: data.channel.scheduleId, userId: data.userId };
+				if (data.type == 'join') {
+					Participant.findOne(query, function (err, participant) {
+						if (participant) {
+							var update = { $set: { 
+										     status: true, 
+											 joinDate: new Date() 
+										   } };
+							Participant.update(query, update,function(result) {
+								logger.log('join result',result);
+							});
+						} else {
+							var participant = new Participant(data);
+							participant.status = true;
+							participant.scheduleId = data.channel.scheduleId;
+							participant.joinDate = new Date();
+							participant.save(function (err) {
+								if (err) logger.log(err);
+								else logger.log('success');
+							});
+						}
+					});
+				} else if (data.type == 'exit') {
+					Participant.findOne(query, function (err, participant) {
+						if (participant) {
+							var update = { $set: { 
+										     status: false, 
+											 exitDate: new Date() 
+										   } };
+							Participant.update(query, update,function(result) {
+								logger.log('exit result',result);
+							});
+						}
+					});
+				}
+			}
+
+		} catch (err) {
+			console.log('publish error', err);
 		}
+
 
 		
 		// logger.log(data);
