@@ -125,8 +125,6 @@ module.exports.Bayeux = function (server) {
 		} catch (err) {
 			console.log('publish error', err);
 		}
-
-
 		
 		// logger.log(data);
 	});
