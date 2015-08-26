@@ -85,7 +85,7 @@ module.exports.Bayeux = function (server) {
 					else logger.log('success');
 				});
 			} else {
-				var query = { scheduleId: data.channel.scheduleId, userId: data.userId };
+				var query = { scheduleId: data.scheduleId, userId: data.userId };
 				if (data.type == 'join') {
 					Participant.findOne(query, function (err, participant) {
 						if (participant) {
@@ -99,7 +99,7 @@ module.exports.Bayeux = function (server) {
 						} else {
 							var participant = new Participant(data);
 							participant.status = true;
-							participant.scheduleId = data.channel.scheduleId;
+							participant.scheduleId = data.scheduleId;
 							participant.joinDate = new Date();
 							participant.save(function (err) {
 								if (err) logger.log(err);
