@@ -15,6 +15,7 @@ router.get('/:scheduleid', function (req, res, next) {
     res.json(list);
   };
   Participant.find({ 'scheduleId': scheduleId,status:true }).
+    //TODO Think a case that participants are grater than 100.
     select('pic username link joinDate').
     limit(100).
     exec(callback);

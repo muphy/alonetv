@@ -10,7 +10,8 @@ var savePrograms = function (db, list, callback) {
 	var opsList = [];
 	_.each(list,function(program) {
 		var ops = { updateOne: { 
-			filter: { scheduleId: program.scheduleId, beginTime: program.beginTime }, 
+			// filter: { scheduleId: program.scheduleId, beginTime: program.beginTime }, old 
+			filter: { scheduleId: program.scheduleId },
 			update: { $set: program }, 
 			upsert: true } 
 		};
