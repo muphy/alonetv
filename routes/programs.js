@@ -16,10 +16,27 @@ router.get('/', function (req, res, next) {
 /* GET /programs/current current programs list. */
 router.get('/current', function (req, res, next) {
   var currentTime = Date.now();
-  Program.find({ "beginTime": { $lt: currentTime }, "endTime": { $gt: currentTime } }, function (err, list) {
+  var callback = function (err, list) {
     if (err) return next(err);
     res.json(list);
-  });
+  };
+  Program.find({ "beginTime": { $lt: currentTime }, "endTime": { $gt: currentTime } })
+    .sort({ _id: -1 })
+    .exec(callback);
+});
+
+router.get('/previous/:hour', function (req, res, next) {
+  var hour = Number(req.params.hour);
+  var baseTime = hour*60*60*1000; //2 hour
+  var previousTime = Date.now()-baseTime;
+  
+  var callback = function (err, list) {
+    if (err) return next(err);
+    res.json(list);
+  };
+  Program.find({ "beginTime": { $lt: previousTime }, "endTime": { $gt: previousTime } } )
+    .sort({ _id: -1 })
+    .exec(callback);
 });
 
 module.exports = router;
